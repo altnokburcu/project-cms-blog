@@ -1,0 +1,11 @@
+[mysqld]
+key_buffer_size	= 16M
+myisam-recover-options = BACKUP
+max_binlog_size = 100M
+default_password_lifetime = 0
+sql-mode='STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION'
+max_allowed_packet = 64M
+character-set-server = utf8mb4
+collation-server = utf8mb4_unicode_ci
+skip-character-set-client-handshake
+port=3307

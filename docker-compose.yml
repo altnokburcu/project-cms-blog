@@ -1,0 +1,71 @@
+version: '3'
+services:
+  web:
+    build:
+      context: ./containers/nginx
+      dockerfile: Dockerfile
+    ports:
+      - "80:80"
+    environment:
+      - NGINX_PORT=80
+    network_mode: bridge
+    links:
+      - php-fpm
+      - mysql
+    volumes:
+      - ./app:/var/www
+      - ./containers/nginx/config/nginx.conf:/etc/nginx/nginx.conf
+      - ./containers/nginx/sites/default.conf:/etc/nginx/sites-available/default.conf
+      - ./containers/nginx/conf.d/default.conf:/etc/nginx/conf.d/default.conf
+    depends_on:
+      - php-fpm
+      - mysql
+    restart: always
+
+  php-fpm:
+    build:
+      context: ./containers/php-fpm
+      dockerfile: Dockerfile
+    network_mode: bridge
+    volumes:
+      - ./app:/var/www
+    restart: always
+    links:
+      - mysql
+
+  mysql:
+    build:
+      context: ./containers/mysql
+      dockerfile: Dockerfile
+    environment:
+      MYSQL_ROOT_PASSWORD: 'secret'
+      MYSQL_USER: 'user'
+      MYSQL_PASSWORD: 'secret'
+      MYSQL_DATABASE: 'testdb'
+    network_mode: bridge
+    volumes:
+      - ./containers/mysql/config/my-custom.cnf:/etc/mysql/conf.d/my-custom.cnf
+      - ./db:/var/lib/mysql
+      - ./db_backups:/home/db_backups
+    ports:
+      - "3307:3307"
+    restart: always
+  phpmyadmin:
+    image: arm64v8/phpmyadmin
+    links:
+      - mysql
+    network_mode: bridge
+    environment:
+      PMA_HOST: 'mysql'
+      PMA_PORT: '3307'
+      PMA_USER: 'root'
+      PMA_PASSWORD: 'secret'
+      MYSQL_ROOT_PASSWORD: 'secret'
+    restart: always
+    depends_on:
+      - mysql
+    ports:
+      - "8080:80"
+volumes:
+  ch-sync:
+    external: true
